@@ -29,6 +29,16 @@
       z-index: 0;
     }
 
+    @media (max-width: 768px) {
+      body::before {
+        width: 100%;
+        height: 200px;
+        background-position: center top;
+        background-size: contain;
+        opacity: 0.4;
+      }
+    }
+
     .converter {
       background: white;
       padding: 30px;
@@ -60,12 +70,6 @@
     .rate {
       margin-bottom: 10px;
       color: gray;
-    }
-
-    @media (max-width: 768px) {
-      body::before {
-        display: none;
-      }
     }
   </style>
 </head>
