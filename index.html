@@ -1,9 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>USDT ↔ TRY Dönüştürücü</title>
+  <link rel="icon" href="logo.png" type="image/png">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,22 +12,24 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 100px;
+      padding: 20px;
     }
     .converter {
       background: white;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      width: 300px;
+      max-width: 400px;
+      width: 100%;
       text-align: center;
     }
-    input {
+    input, select {
       padding: 10px;
       width: 100%;
       margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 5px;
+      font-size: 16px;
     }
     .result {
       font-size: 20px;
@@ -42,6 +45,12 @@
 <body>
   <div class="converter">
     <h2>USDT ↔ TRY</h2>
+
+    <select id="source">
+      <option value="binance">Binance</option>
+      <option value="harem">Harem (USD Kuru)</option>
+    </select>
+
     <div class="rate" id="rate">Güncel kur alınıyor...</div>
 
     <input type="number" id="usdtInput" placeholder="USDT miktarı" />
@@ -54,12 +63,26 @@
   <script>
     let currentRate = 0;
 
-    async function fetchRate() {
+    async function fetchRate(source) {
       try {
-        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY');
+        let url;
+        if (source === "binance") {
+          url = 'https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY';
+        } else if (source === "harem") {
+          url = 'https://www.haremaltin.com/api/doviz';
+        }
+
+        const response = await fetch(url);
         const data = await response.json();
-        currentRate = parseFloat(data.price);
-        document.getElementById("rate").textContent = `1 USDT = ${currentRate.toFixed(2)} TRY`;
+
+        if (source === "binance") {
+          currentRate = parseFloat(data.price);
+        } else if (source === "harem") {
+          const dolar = data.find(item => item.adi.toLowerCase().includes("dolar"));
+          currentRate = dolar ? parseFloat(dolar.satis) : 0;
+        }
+
+        document.getElementById("rate").textContent = `1 USDT = ${currentRate.toFixed(2)} TRY (${source})`;
         calculateFromUSDT();
         calculateFromTRY();
       } catch (error) {
@@ -79,11 +102,22 @@
       document.getElementById("usdtResult").textContent = `USDT: ${result.toFixed(4)}`;
     }
 
-    document.getElementById("usdtInput").addEventListener("input", calculateFromUSDT);
-    document.getElementById("tryInput").addEventListener("input", calculateFromTRY);
+    document.getElementById("usdtInput").addEventListener("input", () => {
+      document.getElementById("tryInput").value = '';
+      calculateFromUSDT();
+    });
 
-    fetchRate();
-    setInterval(fetchRate, 10000); // her 10 saniyede bir kuru günceller
+    document.getElementById("tryInput").addEventListener("input", () => {
+      document.getElementById("usdtInput").value = '';
+      calculateFromTRY();
+    });
+
+    document.getElementById("source").addEventListener("change", () => {
+      fetchRate(document.getElementById("source").value);
+    });
+
+    fetchRate(document.getElementById("source").value);
+    setInterval(() => fetchRate(document.getElementById("source").value), 10000);
   </script>
 </body>
 </html>
