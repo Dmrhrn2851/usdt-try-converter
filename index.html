@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>USDT ↔ TRY Dönüştürücü</title>
-  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -46,9 +46,8 @@
   <div class="converter">
     <h2>USDT ↔ TRY</h2>
 
-    <select id="source">
-      <option value="binance">Binance</option>
-      <option value="harem">Harem (USD Kuru)</option>
+    <select id="source" style="display: none;">
+      <option value="binance" selected>Binance</option>
     </select>
 
     <div class="rate" id="rate">Güncel kur alınıyor...</div>
@@ -63,26 +62,13 @@
   <script>
     let currentRate = 0;
 
-    async function fetchRate(source) {
+    async function fetchRate() {
       try {
-        let url;
-        if (source === "binance") {
-          url = 'https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY';
-        } else if (source === "harem") {
-          url = 'https://api.parabirimleri.com/';
-        }
-
+        const url = 'https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY';
         const response = await fetch(url);
         const data = await response.json();
-
-        if (source === "binance") {
-          currentRate = parseFloat(data.price);
-        } else if (source === "harem") {
-          const dolar = data.find(item => item.adi.toLowerCase().includes("dolar"));
-          currentRate = dolar ? parseFloat(dolar.satis) : 0;
-        }
-
-        document.getElementById("rate").textContent = `1 USDT = ${currentRate.toFixed(2)} TRY (${source})`;
+        currentRate = parseFloat(data.price);
+        document.getElementById("rate").textContent = `1 USDT = ${currentRate.toFixed(2)} TRY (Binance)`;
         calculateFromUSDT();
         calculateFromTRY();
       } catch (error) {
@@ -112,12 +98,8 @@
       calculateFromTRY();
     });
 
-    document.getElementById("source").addEventListener("change", () => {
-      fetchRate(document.getElementById("source").value);
-    });
-
-    fetchRate(document.getElementById("source").value);
-    setInterval(() => fetchRate(document.getElementById("source").value), 10000);
+    fetchRate();
+    setInterval(fetchRate, 10000);
   </script>
 </body>
 </html>
