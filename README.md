@@ -20,5 +20,3 @@ Bu proje, anlık **USDT ile Türk Lirası (TRY)** dönüşümünü sağlar. Veri
 2. `index.html` dosyasını tarayıcınızda açın.
 3. Anlık dönüşümleri görüntüleyin.
 
-## Geliştiren
-📍 DEHA Bilişim
